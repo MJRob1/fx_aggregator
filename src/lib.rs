@@ -35,28 +35,24 @@ impl FxMarketData {
         }
     }
     pub fn generate(fx_data: FxMarketData) -> Result<(), Box<dyn Error>> {
+        // Calculate random price change up to a maximum of 5 pips
+        // Randomly add or subtract this price change to calculate new fx rate
+
         println!("Initial fx buy price is {}", fx_data.buy_prices[0]);
+        let max_pip_change = 5.0; //5 pips - move to config later?
+        let random_pip_change: f64 = rand::random_range(1.0..=max_pip_change);
+        let random_price_change = random_pip_change / 10000.0; // Need to change for USD/JPY
+        println!("The random price change is: {random_price_change}");
+        // round this to 4 decimal places - seems this is the only way to do it in rust?  Need to change to 2 dec places for USD/JPY
+        let rounded_price_change = (random_price_change * 10000.0).round() / 10000.0;
+        println!("The rounded price change is: {rounded_price_change}");
 
-        // generate random number from previous price to previous price + 2 pips - make 2 pips a config option later
-        let increment: f64 =
-            rand::random_range(fx_data.buy_prices[0]..=fx_data.buy_prices[0] + 0.0002)
-                - fx_data.buy_prices[0];
-        println!("The increment is: {increment}");
-
-        // round this to 4 decimal places - seems this is the only way to do it in rust?
-        let delta = (increment * 10000.0).round() / 10000.0;
-        println!("The delta is: {delta}");
-
-        let direction = rand::rng().random_bool(0.5);
-        //println!("True or false: {}", rng.random::<bool>());
-        println!("direction is {direction}");
-
-        if direction {
-            let new_price = fx_data.buy_prices[0] + delta;
-            println!("new rice is {new_price}");
+        if rand::rng().random_bool(0.5) {
+            let new_price = fx_data.buy_prices[0] + rounded_price_change;
+            println!("increase - new price is {new_price}");
         } else {
-            let new_price = fx_data.buy_prices[0] - delta;
-            println!("new rice is {new_price}");
+            let new_price = fx_data.buy_prices[0] - rounded_price_change;
+            println!("decrease - new price is {new_price}");
         }
 
         Ok(())
