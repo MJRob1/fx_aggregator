@@ -12,11 +12,11 @@ fn main() {
     // Get starting fx data for input values
     // just do the one lp above for now
 
-    let fx_data = FxMarketData::new(lp, instrument, price);
+    let mut fx_data = FxMarketData::new(lp, instrument, price);
     println!("initial fx_data is {fx_data:?}");
 
     // generate simulation market data with this initial fx data
-    if let Err(e) = FxMarketData::generate(fx_data) {
+    if let Err(e) = FxMarketData::generate(&mut fx_data) {
         println!("Error for now!: {e}");
         process::exit(1);
     }

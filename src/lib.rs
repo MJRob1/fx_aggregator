@@ -14,6 +14,29 @@ pub struct FxMarketData {
 }
 
 impl FxMarketData {
+    fn update_to_next_value(&mut self) {
+        // Calculate random price change up to a maximum of 5 pips
+        // Randomly add or subtract this price change to calculate new fx rate
+        println!("Initial fx buy price is {}", self.buy_prices[0]);
+        let max_pip_change = 5.0; //5 pips - move to config later?
+        let random_pip_change: f64 = rand::random_range(1.0..=max_pip_change);
+        let random_price_change = random_pip_change / 10000.0; // Need to change for USD/JPY
+        println!("The random price change is: {random_price_change}");
+        // round this to 4 decimal places - seems this is the only way to do it in rust?  Need to change to 2 dec places for USD/JPY
+        let rounded_price_change = (random_price_change * 10000.0).round() / 10000.0;
+        println!("The rounded price change is: {rounded_price_change}");
+
+        if rand::rng().random_bool(0.5) {
+            self.buy_prices[0] += rounded_price_change;
+            // println!("increase - new price is {new_price}");
+        } else {
+            self.buy_prices[0] -= rounded_price_change;
+            //     println!("decrease - new price is {new_price}");
+        };
+
+        println!("price at end of loop is {}", self.buy_prices[0]);
+    }
+
     pub fn new(lp: String, instrument: String, price: f64) -> FxMarketData {
         let liquidity_provider = lp;
         let instrument = instrument;
@@ -34,27 +57,21 @@ impl FxMarketData {
             timestamp,
         }
     }
-    pub fn generate(fx_data: FxMarketData) -> Result<(), Box<dyn Error>> {
-        // Calculate random price change up to a maximum of 5 pips
-        // Randomly add or subtract this price change to calculate new fx rate
-
-        println!("Initial fx buy price is {}", fx_data.buy_prices[0]);
-        let max_pip_change = 5.0; //5 pips - move to config later?
-        let random_pip_change: f64 = rand::random_range(1.0..=max_pip_change);
-        let random_price_change = random_pip_change / 10000.0; // Need to change for USD/JPY
-        println!("The random price change is: {random_price_change}");
-        // round this to 4 decimal places - seems this is the only way to do it in rust?  Need to change to 2 dec places for USD/JPY
-        let rounded_price_change = (random_price_change * 10000.0).round() / 10000.0;
-        println!("The rounded price change is: {rounded_price_change}");
-
-        if rand::rng().random_bool(0.5) {
-            let new_price = fx_data.buy_prices[0] + rounded_price_change;
-            println!("increase - new price is {new_price}");
-        } else {
-            let new_price = fx_data.buy_prices[0] - rounded_price_change;
-            println!("decrease - new price is {new_price}");
-        }
+    pub fn generate(fx_data: &mut FxMarketData) -> Result<(), Box<dyn Error>> {
+        fx_data.update_to_next_value();
 
         Ok(())
+    }
+}
+
+fn new_price(price: f64, delta: f64) -> f64 {
+    if rand::rng().random_bool(0.5) {
+        let price = price + delta;
+        println!("increase - new price is {price}");
+        return price;
+    } else {
+        let price = price - delta;
+        println!("decrease - new price is {price}");
+        return price;
     }
 }
